@@ -22,7 +22,6 @@ schoenemann <- function(dmat, p = 2, fsel = 0) {
     fs <- ftil[, fsel]
   }
   alst <- lm.fit(kmat, fs)
-  print(alst$residuals)
   if (alst$rank < ncol(kmat)) {
     print("warning: matrix K is singular, powering on nevertheless")
   }

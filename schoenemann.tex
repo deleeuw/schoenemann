@@ -280,7 +280,7 @@
 
 \title{Metric Multidimensional Unfolding}
 \author{Jan de Leeuw}
-\date{March 3, 2026}
+\date{March 4, 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -764,14 +764,6 @@ and we are stuck. As this happens, for now, we give up.
 Of course these problems will be less serious if the fit is good, i.e.
 if the elements of \(D\) are approximately squared Euclidean distances.
 
-The only choice that could make a difference is the full-rank
-decomposition. Suppose \(C=\tilde G\tilde H'\) is a different one. It
-follows that \(\tilde G=GA\) and \(\tilde H=HB\), with \(AB'=I\). This
-does not change \(\tilde F\), but it does change the matrix \(K\) from
-\eqref{eq-kdef}. If \(T\) and \(\eta\) solve \ldots, then
-\(\tilde T=A^{-1}T\) and \(\tilde\eta=A\eta\) solve. Thus in the case of
-perfect data it does not matter which full-rank decomposition we choose.
-
 \sectionbreak
 
 \section{Real Examples}\label{real-examples}
@@ -805,6 +797,10 @@ cities. The cities are
 
 We start by computing the metric MDS solution on the full matrix.
 
+The following two plots give the configuration and the D-Dhat plot for
+the airline data. The East-West and North-South dimensions show up
+clearly in the plot.
+
 \begin{figure}[H]
 
 {\centering \pandocbounded{\includegraphics[keepaspectratio]{schoenemann_files/figure-pdf/acomplot-1.pdf}}
@@ -826,14 +822,9 @@ We start by computing the metric MDS solution on the full matrix.
 \end{figure}%
 
 We now create a \(9\times 9\) off-diagonal submatrix by using the
-even-numbered cities as rows and the rest as columns.
-
-\begin{verbatim}
-Cape Town  Honolulu Melbourne  Montreal New Delhi     Paris      Rome Singapore 
- 15178249 -19983326  72154652   9079143 -15685589 -15490286 -18732170  17400218 
-    Tokyo 
--43920890 
-\end{verbatim}
+even-numbered cities as rows and the rest as columns. The transpose of
+the submatrix is also analyzed. Although the two dimensions from the
+complete solution are still there the plots have some distortions
 
 \begin{figure}[H]
 
@@ -844,13 +835,6 @@ Cape Town  Honolulu Melbourne  Montreal New Delhi     Paris      Rome Singapore
 \caption{Airline Distances, Configuration Plot, Off-diagonal Submatrix}
 
 \end{figure}%
-
-\begin{verbatim}
-       Beijing      Hong Kong         London         Mexico         Moscow 
-    -1620485.1       821188.6     -2785776.1      -799877.4      1565902.3 
-      New York Rio de Janeiro  San Francisco      Stockholm 
-      283503.7       618758.3       760340.6      1156445.2 
-\end{verbatim}
 
 \begin{figure}[H]
 
@@ -872,62 +856,13 @@ Our next example is the same as the one in Heiser and De Leeuw
 into eight groups, judge how important 17 characteristics of their
 classmates are for their power in the classroom. Data are the times each
 of properties were rated as ``very important'' by the eight age-sex
-groups.
+groups. The groups have three-digit codes in the joint configuration
+plot. The first digit indicates the school grade (third vs higher), the
+second the gender of the respondent, the third indicates the importance
+of the property rated for males or females.
 
-\begin{verbatim}
- [1]  79.017919 -12.698372  23.686197  23.285385 -60.479654   8.232041
- [7] -16.952716 -18.154758 -24.073906  10.739212 -56.880212 -33.982565
-[13]  -9.363047  14.488782  94.669154  15.379843 -36.913301
-\end{verbatim}
-
-\begin{verbatim}
- [1]  79.1899849  -9.4905844  33.1322140  22.8631531 -60.0477324  10.0794896
- [7] -28.2660450 -17.3950913 -18.7115745   4.5014082 -62.5080225 -37.4110494
-[13]   7.7519313   3.6892649 107.2436495   0.6566242 -35.2776203
-\end{verbatim}
-
-\begin{verbatim}
- [1]  61.618229 -15.870511  13.262632  14.539968 -62.198469   8.247875
- [7]  13.654476  -9.990691 -26.858921  12.186508 -32.443489 -29.320272
-[13] -44.509578  45.930391  48.935649  36.042465 -33.226262
-\end{verbatim}
-
-\begin{verbatim}
- [1]  122.244303  -11.907686   39.400145   45.175785  -56.498804    6.464034
- [7]  -71.564089  -39.795908  -32.039728   19.157813 -108.461995  -36.170685
-[13]   44.869669  -56.054076  187.189220   -5.822760  -46.185237
-\end{verbatim}
-
-\begin{verbatim}
- [1]  55.468653 -18.533386  30.490259  11.831318 -39.921034   5.624496
- [7]  11.611207   4.093778 -26.339024  -4.639230 -34.263739  -2.155524
-[13] -15.396261 -23.972294  54.098128  10.774667 -18.772014
-\end{verbatim}
-
-\begin{verbatim}
- [1]  94.689204 -18.462734 -20.068551  34.583962 -63.412351  -4.344759
- [7]  -3.676043 -31.917713 -29.570535  34.815916 -53.461221 -33.020945
-[13] -41.691424  61.284017  81.343874  50.277673 -57.368371
-\end{verbatim}
-
-\begin{verbatim}
- [1]  68.861460  -8.850725  11.253473  20.815468 -59.034993  12.334238
- [7] -20.653653  -4.229856  -6.614503  -6.503123 -57.213947 -47.118234
-[13]  11.512362  35.501661  97.465773 -18.880570 -28.644831
-\end{verbatim}
-
-\begin{verbatim}
- [1]  85.816360  -9.517549  55.748236  24.162600 -37.731289  -8.983873
- [7] -35.940643 -26.759836 -18.698310   7.529225 -57.737008   4.335168
-[13]  26.118228 -69.499187 101.250258   8.207396 -48.299775
-\end{verbatim}
-
-\begin{verbatim}
- [1]   64.2551552   -8.9538023   26.2711657   12.3108234 -104.9925628
- [6]   36.4348272   -0.7869388  -19.2427462  -33.7586535   18.8651790
-[11]  -48.9522718  -90.9989809  -63.5593004  119.0304796   79.8266771
-[16]   41.7832480  -27.5322986
-\end{verbatim}
+We first give the configuration plot and the Dist-Dhat plot. For the ''
+f average'' analysis.
 
 \begin{figure}[H]
 
@@ -949,16 +884,25 @@ groups.
 
 \end{figure}%
 
+Next, we perform an analysis for each of the columns of \(F\)
+separately, and we plot the solutions for the column scores \(Y\) in a
+single plot (without matching them with rotation and translation). We
+overlay the result with the result of the average analysis (in red).
+
 \begin{figure}[H]
 
 {\centering \pandocbounded{\includegraphics[keepaspectratio]{schoenemann_files/figure-pdf/yplot-1.pdf}}
 
 }
 
-\caption{Gold Data, Column Configuration from 8 Column and One Average
-Analysis}
+\caption{Gold Data, Column Configuration from Eight Column and One
+Average Analysis}
 
 \end{figure}%
+
+The solution seems to be quite stable over column-selection. It should
+be noted that if we go to three dimensions, or if we transpose the
+analysis, the matrix \(M\) is no longer positive definite.
 
 \subsection{Roskam}\label{roskam}
 
@@ -990,48 +934,20 @@ their work. The departments are
   Physiological and Animal Psychology
 \end{enumerate}
 
-The data are 39 rank orders. It seems rather procrustean to approximate
-discrete rank numbers by continuous distances. And moreover the data are
-conditional, which means that a rank equal to five for staff member A
-may not have the same ``meaning'' as a five for staff member B.
-Nevertheless we use the data for our example, since it is after all an
+Thus the data are 39 rank orders. It seems rather procrustean to
+approximate discrete rank numbers by continuous distances. Moreover the
+data are conditional, which means that a rank equal to five for staff
+member A may not have the same ``meaning'' as a five for staff member B.
+Nevertheless we use these data for our example, since it is after all an
 off-diagonal rectangular matrix with positive numbers.
 
 All rows of \(D\) add up to 45, so if we were to choose row-means for
 \(f\) they would be exactly zero. If we use all of the 9 rows of \(F\)
 in turn, then for six of them we find that \(M\) is indefinite. The
-configurations for rows 1, 2, and 7 are plotted.
-
-\begin{verbatim}
- [1] -1.70672963 -0.93124598 -0.60935604 -0.56454260  2.45177359  1.06751772
- [7] -1.53126895 -0.21236889  0.56042009 -1.72716068  1.31458357 -0.57022847
-[13]  0.10534052 -1.73410523  0.77902031 -0.65359452 -0.98765234  1.38938678
-[19]  1.93223937  1.09999594 -0.80150266  1.02556853  0.45037792 -0.22212690
-[25] -0.74324829 -0.90990730 -1.52824724 -3.20802971  0.17841206  0.02470811
-[31]  2.46061492  1.24173356  0.03287459  3.27405826  1.90661155 -0.71636743
-[37]  0.41801267  0.02457442 -2.38014162
-\end{verbatim}
-
-\begin{verbatim}
- [1]  0.7670390528 -1.1915662055 -0.2864272282 -0.9545502891 -1.9307192535
- [6] -0.1285701110 -1.2123965692 -0.0760651190 -0.8502965238 -0.0368000121
-[11] -3.5791444049  0.2509467012  4.0696285427  4.0542149484  0.9429967128
-[16]  0.3576568486  2.2632010012  1.4491786444 -0.9108358612 -2.2444509404
-[21] -2.7119057294 -0.0646145649  0.1059640696  0.9380585512 -0.9268320702
-[26]  0.1299040158 -0.5444481413  2.1965323436 -0.0005197562  0.7587316606
-[31]  0.1190575997 -0.4627446328 -0.5434534692 -2.1341140273 -1.4074546409
-[36]  0.7748641613  0.1583863604  1.9854367123  0.8761116235
-\end{verbatim}
-
-\begin{verbatim}
- [1]  2.48963945 -1.33045354  0.28491128 -1.50185823 -3.07678135 -0.23986663
- [7] -0.16659175  0.07274564  0.64831953  0.48731956 -1.12528697 -0.42115131
-[13] -0.23798644  0.17569319 -0.04386118  1.27130271  3.02464669  1.69740843
-[19] -0.95537910 -0.94850137 -0.38784820 -1.75824264 -1.17865985  0.16496388
-[25]  0.98729221  0.02960496  0.36909955  3.78388758  2.51779741  2.57349000
-[31] -0.97095308 -1.23691473 -0.61307131 -1.54187889 -2.29126352 -1.46404652
-[37] -0.17465993 -1.34286011  2.42999457
-\end{verbatim}
+configurations for rows 1, 2, and 7 are plotted. There is clearly a
+worse fit, and much less stability, than in the Gold example. The most
+important difference between the three analyses is the relative size of
+the row and column configurations.
 
 \begin{figure}[H]
 
@@ -1062,6 +978,11 @@ configurations for rows 1, 2, and 7 are plotted.
 \caption{Roskam Data, Configuration Plot from Column 7}
 
 \end{figure}%
+
+The D-Dhat plot for the column seven solution shows the poor fit (due
+mostly to fitting distances to rank numbers). The red line shows the
+average Dhat value for each distance category, indicating at least some
+degree of monotonicity.
 
 \begin{figure}[H]
 

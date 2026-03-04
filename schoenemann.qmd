@@ -316,14 +316,6 @@ As this happens, for now, we give up.
 Of course these problems will be less serious if the fit is good, i.e.
 if the elements of $D$ are approximately squared Euclidean distances.
 
-The only choice that could make a difference is the full-rank decomposition.
-Suppose $C=\tilde G\tilde H'$ is a different one. It follows that
-$\tilde G=GA$ and $\tilde H=HB$, with $AB'=I$. This does not change
-$\tilde F$, but it does change the matrix $K$ from \eqref{eq-kdef}. 
-If $T$ and $\eta$ solve ..., then $\tilde T=A^{-1}T$ and $\tilde\eta=A\eta$
-solve. Thus in the case of perfect data it does not matter which
-full-rank decomposition we choose.
-
 
 \sectionbreak
 
@@ -346,16 +338,22 @@ ca <- -(dd - outer(da, da, "+") + dm) / 2
 ea <- eigen(ca)
 xa <- ea$vectors[,1:2] %*% diag(sqrt(ea$values[1:2]))
 ```
+The following two plots give the configuration and the D-Dhat plot for the
+airline data. The East-West and North-South dimensions show up clearly in the plot.
 ```{r acomplot, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Airline Distances, Configuration Plot, Complete Data"}
 par(pty="s")
 plot(xa, type = "n", xlab = "dim 1", ylab = "dim 2")
 text(xa, row.names(airline), col = "RED", cex = 1.5)
 ```
+
+
 ```{r acomplot2, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Airline Distances, Dist-Dhat Plot, Complete Data"}
 plot(as.dist(airline), dist(xa), col = "BLUE", pch = 19, cex = 1.5,
      xlab = "D", ylab = "DHAT")
 ```
-We now create a $9\times 9$ off-diagonal submatrix by using the even-numbered cities as rows and the rest as columns. 
+We now create a $9\times 9$ off-diagonal submatrix by using the even-numbered cities as rows and the rest as columns. The transpose of the submatrix is 
+also analyzed. Although the two dimensions from the complete solution are
+still there the plots have some distortions
 ```{r airect1, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Airline Distances, Configuration Plot, Off-diagonal Submatrix"}
 par(pty="s")
 hr <- schoenemann(airlineRect^2)
@@ -389,7 +387,13 @@ The data are taken from the *Power in the Classroom* study of @gold_58.
 Children in elementary school, divided into eight groups, judge how important
 17 characteristics of their classmates are for their power in the classroom. 
 Data are the times each of properties were rated as "very important" by the
-eight age-sex groups.
+eight age-sex groups. The groups have three-digit codes in the joint
+configuration plot. The first digit indicates the school grade (third vs
+higher), the second the gender of the respondent, the third indicates
+the importance of the property rated for males or females. 
+
+We first give the configuration plot and the Dist-Dhat plot. For the 
+" f average" analysis.
 
 ```{r gold, echo = FALSE}
 gold <-
@@ -417,6 +421,8 @@ hgold6 <- schoenemann(goldMatrix^2, fsel = 6)
 hgold7 <- schoenemann(goldMatrix^2, fsel = 7)
 hgold8 <- schoenemann(goldMatrix^2, fsel = 8)
 ```
+
+
 ```{r jplot, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Gold Data, Configuration Plot"}
 par(pty="s")
 plot(rbind(hgold0$xhat, hgold0$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
@@ -428,9 +434,12 @@ text(hgold0$yhat, goldLabels, col = "RED", cex = 2)
 par(pty="s")
 plot(hgold0$d, hgold0$dhat, cex = 2, col = "BLUE", pch = 19, xlab = "D", ylab = "DHAT")
 ```
+Next, we perform an analysis for each of the columns of $F$ separately, and
+we plot the solutions for the column scores $Y$ in a single plot (without
+matching them with rotation and translation). We overlay the result with the
+result of the average analysis (in red).
 
-
-```{r yplot, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Gold Data, Column Configuration from 8 Column and One Average Analysis"}
+```{r yplot, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Gold Data, Column Configuration from Eight Column and One Average Analysis"}
 par(pty="s")
 plot(rbind(hgold1$y,hgold2$y,hgold3$y,hgold4$y,hgold5$y,hgold6$y,hgold7$y,hgold8$y),type="n", xlab = "dim 1", ylab = "dim 2")
 text(hgold1$y, as.character(1:8), col = "BLUE", cex = 2)
@@ -441,8 +450,11 @@ text(hgold5$y, as.character(1:8), col = "BLUE", cex = 2)
 text(hgold6$y, as.character(1:8), col = "BLUE", cex = 2)
 text(hgold7$y, as.character(1:8), col = "BLUE", cex = 2)
 text(hgold8$y, as.character(1:8), col = "BLUE", cex = 2)
-text(hgold0$y, as.character(1:8), col = "RED", cex = 3)
+text(hgold0$y, goldLabels, col = "RED", cex = 2)
 ```
+
+The solution seems to be quite stable over column-selection. It should be noted that if we go to three dimensions, or if we transpose the analysis, the matrix
+$M$ is no longer positive definite.
 
 ## Roskam
 
@@ -459,14 +471,16 @@ at Nijmegen University to rank the nine different departments in the laboratory 
 8. Test Construction and Validation
 9. Physiological and Animal Psychology
 
-The data are 39 rank orders. It seems
+Thus the data are 39 rank orders. It seems
 rather procrustean to approximate  discrete rank numbers by
-continuous distances. And moreover the data are conditional, which means that
-a rank equal to five for staff member A may not have the same "meaning" as a five for staff member B. Nevertheless we use the data for our example, since it is after all an off-diagonal rectangular matrix with positive numbers.
+continuous distances. Moreover the data are conditional, which means that
+a rank equal to five for staff member A may not have the same "meaning" as a five for staff member B. Nevertheless we use these data for our example, since it is after all an off-diagonal rectangular matrix with positive numbers.
 
 All rows of $D$ add up to 45, so if we were to choose row-means for $f$ they would
 be exactly zero. If we use all of the 9 rows of $F$ in turn, then for
-six of them we find that $M$ is indefinite. The configurations for rows 1, 2, and 7 are plotted.
+six of them we find that $M$ is indefinite. The configurations for rows 1, 2, and 7 are plotted. There is clearly a worse fit, and much less stability, than
+in the Gold example. The most important difference between the three analyses
+is the relative size of the row and column configurations.
 
 ```{r rosdata, echo = FALSE}
 roskam <-
@@ -545,6 +559,10 @@ par(pty="s")
        col = "BLUE",
        cex = 1.5)
 ```
+The D-Dhat plot for the column seven solution shows the poor fit (due mostly
+to fitting distances to rank numbers). The red line shows the average Dhat 
+value for each distance category, indicating at least some degree of 
+monotonicity.
 
 ```{r rosdd, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Roskam Data, D-DHAT plot, Column 7 Solution"}
 plot(h7$d, h7$dhat, xlab = "D", ylab = "DHAT", pch = 19, col = "BLUE", cex = 1.5)
