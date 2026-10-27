@@ -1,15 +1,15 @@
 ---
 title: Metric Multidimensional Unfolding
-author: 
-    - name: Jan de Leeuw
-      orcid: 0000-0003-1420-1797
-      email: jan@deleeuwpdx.net
-      affiliation: 
-        - name: University of California Los Angeles
-          city: Los Angeles
-          state: CA
-          url: www.ucla.edu
-      license: "CC0"
+author:
+  - name: Jan de Leeuw
+    orcid: 0000-0003-1420-1797
+    email: jan@deleeuwpdx.net
+    affiliation:
+      - name: University of California Los Angeles
+        city: Los Angeles
+        state: CA
+        url: www.ucla.edu
+    license: "CC0"
 date: last-modified
 date-format: long
 bibliography: [mypubs.bib, total.bib]
@@ -17,18 +17,18 @@ number-sections: true
 pdf-engine: lualatex
 keep-tex: true
 format:
-   pdf:
+  pdf:
     fontsize: 12pt
-    include-in-header: 
-     - preamble.tex
+    include-in-header:
+      - preamble.tex
     keep-tex: true
     link-citations: true
     documentclass: scrartcl
     number-sections: true
-   html:
+  html:
     fontsize: 12pt
-    include-in-header: 
-     - preamble.css
+    include-in-header:
+      - preamble.css
     keep-md: true
     number-sections: true
 toc: true
@@ -38,19 +38,26 @@ papersize: letter
 graphics: true
 link-citations: true
 mainfont: Times New Roman
-abstract: We review Schönemann's technique to reconstruct a configuration of $n+m$   points from an $n\times m$ off-diagonal submatrix of the distance matrix. 
-  The technique is meant for error-free distances, but we pat spacial attention 
-  to what happens if it is applied to dissimilarities which may not have a 
-  perfect representation in Euclidean space. Examples are analyzed and R 
-  programs are provided. 
+abstract: We review Schönemann's technique to reconstruct a configuration of $n+m$   
+  points from an $n\times m$ off-diagonal submatrix of the distance matrix.
+  The technique is meant for error-free distances, but we pay special attention
+  to what happens if it is applied to dissimilarities which do not have a
+  perfect representation in Euclidean space. Examples are analyzed and R
+  programs are provided.
 ---
 
-```{r loadpackages, echo = FALSE}
+```{r}
+#| label: loadpackages
+#| echo: false
+
 suppressPackageStartupMessages(library(knitr, quietly = TRUE))
 suppressPackageStartupMessages(library(tinytex, quietly = TRUE))
 ```
 
-```{r somecode, echo = FALSE}
+```{r}
+#| label: somecode
+#| echo: false
+
 ei <- function(i, n) ifelse(i == 1:n, 1, 0)
 jmat <- function(n) diag(n) - 1/n
 matrixPrint <- function(x,
@@ -73,169 +80,219 @@ source("schoenemann.R")
 
 \sectionbreak 
 
-**Note:** This is a working manuscript which can be expanded/updated
-multiple times. All suggestions for improvement are welcome. All Rmd, tex,
-html, pdf, R, and C files are in the public domain. Attribution will be
-appreciated, but is not required. The files can be found at
-<https://github.com/deleeuw/schoenemann> 
+**Note:** This is a working manuscript which can be expanded/updated multiple
+times. All suggestions for improvement are welcome. All Rmd, tex, html, pdf, R,
+and C files are in the public domain. Attribution will be appreciated, but is
+not required. The files can be found at <https://github.com/deleeuw/schoenemann>
 
 \sectionbreak
 
 # Introduction
 
 At the core of classical metric Multidimensional Scaling (MDS) is the
-Schoenberg-Young-Householder-Torgerson-Gower (SYHTG) Theorem. It was first proved in a distance geometry context by @schoenberg_35 and then (independently, it seems)  by @young_householder_38 for application in the very first versions of MDS in psychometrics. It was given its current more computational form by @torgerson_58 and @gower_66.
+Schoenberg-Young-Householder-Torgerson-Gower (SYHTG) Theorem. It was first
+proved in a distance geometry context by @schoenberg_35 and then (independently,
+it seems) by @young_householder_38 for application in the very first versions of
+MDS in psychometrics. It was given its current more computational form by
+@torgerson_58 and @gower_66.
 
-Suppose $D$ is a square, symmetric, and hollow non-negative matrix with dissimilarities between $n$ objects. Define 
+Suppose $D$ is a square, symmetric, and hollow non-negative matrix with
+dissimilarities between $n$ objects. Define
 \begin{equation}
-C:=-\frac12 J_n(D\times D)J_n
+  C := -\frac12 J_n(D \times D)J_n
 \end{equation}
-where $J_n=I-n^{-1}e_ne_n'$ is the centering matrix, $e_n$ has all its 
-elements equal to one, and $D\times D$ is the elementwise square of $D$.
-The SYHTG theorem says that there is an $n\times p$ matrix $X$ such that
+where $J_n = I - n^{-1}e_ne_n'$ is the centering matrix, $e_n$ has all its
+elements equal to one, and $D \times D$ is the elementwise square of $D$. The
+SYHTG theorem says that there is an $n \times p$ matrix $X$ such that
 \begin{equation}
-d_{ij}=\sqrt{\sum_{s=1}^p(x_{is}-x_{js})^2}
+  d_{ij} = \sqrt{\sum_{s=1}^p(x_{is} - x_{js})^2}
 \end{equation}
-if and only if $C$ is positive semidefinite with rank $r\leq p$. Moreover
-in that case $n\times r$ solutions $X$ can be found from any full rank decomposition $C=XX'$. 
+if and only if $C$ is positive semidefinite with rank $r \leq p$. Moreover in
+that case $n \times r$ solutions $X$ can be found from any full rank
+decomposition $C = XX'$.
 
 The SYHTG result has an existence part, which says that a Euclidean
-representation exists if and only if the matrix $C$ is positive 
-semi-definite. This is an algebraic result, which is of limited
-direct relevance for data analysis. In practical situations data
-will be fallible, and we merely expect that dissimilarities can be 
-approximated by Euclidean distances. The second part of the SYHTG
-result is an approximation result, which says that a $p$-dimensional 
-Euclidean configuration of points with distances that approximate
-the given dissimilarities can be found by using the $p$ largest eigenvalues
-of $C$ and the corresponding eigenvectors.
+representation exists if and only if the matrix $C$ is positive semi-definite.
+This is an algebraic result, which is of limited direct relevance for data
+analysis. In practical situations data will be fallible, and we merely expect
+that dissimilarities can be approximated by Euclidean distances. The second part
+of the SYHTG result is an approximation result, which says that a
+$p$-dimensional Euclidean configuration of points with distances that
+approximate the given dissimilarities can be found by using the $p$ largest
+eigenvalues of $C$ and the corresponding eigenvectors.
 
-Multidimensional Unfolding (MDU) is a special case of MDS in which
-there are two disjoint sets of objects. The first set has $n$
-elements, the second set has $m$ elements. The non-negative matrix $D$ is
-$n\times m$ and contains the dissimilarities between the elements
-of the first and second set. The within-set dissimilarities are
-missing. There were some tentative attempts to generalize the
-SYHTG theorem to off-diagonal data of this form, but not much was
-achieved until the work of @schoenemann_70, which also has a review of the accomplishments until 1970. 
+Multidimensional Unfolding (MDU) is a special case of MDS in which there are two
+disjoint sets of objects. The first set has $n$ elements, the second set has $m$
+elements. The non-negative matrix $D$ is $n \times m$ and contains the
+dissimilarities between the elements of the first and second set. The within-set
+dissimilarities are missing. There were some tentative attempts to generalize
+the SYHTG theorem to off-diagonal data of this form, but not much was
+accomplished until the work of @schoenemann_70, which also has a review of the
+tentative earlier results.
 
-Schönemann's technique is developed for perfect data, i.e. for dissimilarities that can be faithfully represented as distances in Euclidean space. It is
-an exact algebraic method that does not involve any approximation, similar 
-to the embedding part of the SYHTG theorem. In the second part of his paper
-Schönemann applies the embedding calculations to "fallible" data, using
-some small artificial examples. Unlike the SYHTG approximation part, which
-has a clear least squares interpretation, these calculations proceed 
-by what Joe Kruskal used to call "ignoring errors". 
+Schönemann's technique is developed for perfect data, i.e. for dissimilarities
+that can be faithfully represented as distances in Euclidean space. It is an
+exact algebraic method that does not involve any approximation, similar to the
+embedding part of the SYHTG theorem. In the second part of his paper Schönemann
+applies the embedding calculations to "fallible" data, using some small
+artificial examples. Unlike the SYHTG approximation part, which has a clear
+least squares interpretation, these calculations proceed by what Joe Kruskal
+used to call "ignoring errors".
 
-@heiser_deleeuw_A_79 present various variations of the Schönemann technique,
-and review the literature until 1979. They also compare the results on various examples with metric MDS results obtained from smacof, the standard iterative
-least squares MDS technique. And they provide an example of applying their
-Schönemann variations on a real data analysis example. Although the standard
-MDS textbook of @borg_groenen_05 pays a lot of attention to unfolding, the work
-of Schönemann is only mentioned in a single footnote.
+@heiser_deleeuw_A_79 present various variations of the Schönemann technique, and
+review the literature until 1979. They also compare the results on an actual
+example with the metric MDS results obtained from smacof, the standard iterative
+least squares MDS technique. Not much work has been done since 1980. Although
+the standard MDS textbook of @borg_groenen_05 pays a lot of attention to
+unfolding, the work of Schönemann is only mentioned in a single footnote.
 
 # Perfect Data
 
-Suppose $D$ is an $n\times m$ matrix with non-negative numbers. The problem we
+Suppose $D$ is an $n \times m$ matrix with non-negative numbers. The problem we
 study in this paper is solving the system of equations
 \begin{equation}
-d_{ij}=\sum_{s=1}^p(x_{is}-y_{js})^2.\label{eq-d}
+  d_{ij} = \sum_{s=1}^p(x_{is} - y_{js})^2.\label{eq-d}
 \end{equation}
-for an  $n\times p$ matrix $X$ and an $m\times p$ matrix $Y$.
-In matrix notation \eqref{eq-d} becomes
+for an $n \times p$ matrix $X$ and an $m \times p$ matrix $Y$. In matrix
+notation \eqref{eq-d} becomes
 \begin{equation}
-D=\alpha e_m'+e_n\beta'-2XY',\label{eq-dmat}
+  D = \alpha e_m' + e_n\beta' - 2XY',\label{eq-dmat}
 \end{equation}
-with $\alpha:=\text{diag}(XX')$ and $\beta:=\text{diag}(YY')$ and with $e_n$ and $e_m$ vectors of appropriate length with all elements equal to one. In this section we study the case in which we have "perfect data", i.e. in which \eqref{eq-dmat} has a solution $(X,Y)$ for some $p$. Our problem is to recover $X$ and $Y$ from $D$.
+with $\alpha := \text{diag}(XX')$ and $\beta := \text{diag}(YY')$ and with $e_n$
+and $e_m$ vectors of appropriate length with all elements equal to one. In this
+section we study the case in which we have "perfect data", i.e. in which
+\eqref{eq-dmat} has a solution $(X,Y)$ for some $p$. Our problem is to recover
+$X$ and $Y$ from $D$.
 
-Suppose $J_n=I-n^{-1}e_ne_n'$ and $J_m=I-m^{-1}e_me_m'$ are centering matrices. Then
+Suppose $J_n = I - n^{-1}e_ne_n'$ and $J_m = I - m^{-1}e_me_m'$ are centering
+matrices. Then
 \begin{equation}
-C:=-\frac12 J_nDJ_m=J_nXY'J_m.\label{eq-cdef}
+  C := -\frac12 J_nDJ_m = J_nXY'J_m.\label{eq-cdef}
 \end{equation}
-Suppose $C$ has rank $p$ and $C=GH'$ is any full-rank decomposition of $C$. Being able to construct $X$ and $Y$ from $C$ assumes that $J_nX$ and $J_mY$ have the same rank as $X$ and $Y$, which means that we assume that $e_n$ is not in the column-space of $X$ and $e_m$ is not in the column space of $Y$. If that assumption is violated the full-rank decomposition has rank $q<p$. In an extreme case, suppose $Y=e_my'$ for some $p$-vector $y$. Then all rows of $D$ are the same and $C=0$.
+Suppose $C$ has rank $p$ and $C = GH'$ is any full-rank decomposition of $C$.
+Being able to construct $X$ and $Y$ from $C$ assumes that $J_nX$ and $J_mY$ have
+the same rank as $X$ and $Y$, which means that we assume that $e_n$ is not in
+the column-space of $X$ and $e_m$ is not in the column space of $Y$. If that
+assumption is violated the full-rank decomposition has rank $q < p$. In an
+extreme case, suppose $Y = e_my'$ for some $p$-vector $y$. Then all rows of $D$
+are the same and $C = 0$.
 
-From \eqref{eq-cdef} it follows that there exist
-$p\times p$ nonsingular matrices $T$ and $S$ and vectors $\mu$ and $\nu$ 
-of length $p$ such that
+From \eqref{eq-cdef} it follows that there exist $p \times p$ nonsingular
+matrices $T$ and $S$ and vectors $\mu$ and $\nu$ of length $p$ such that
 \begin{subequations}
-\begin{align}
-X&=GT+e_n\mu',\\
-Y&=HS+e_m\nu',\\
-TS'&=I.
-\end{align}
+  \begin{align}
+    X   & = GT + e_n\mu', \\
+    Y   & = HS + e_m\nu', \\
+    TS' & = I.
+  \end{align}
 \end{subequations}
 Consequently
 \begin{subequations}
-\begin{align}
-XX'&=GMG'+GT\mu e_n'+e_n\mu'T'G'+\mu'\mu\ e_ne_n',\label{eq-5a}\\
-YY'&=HNH'+HS\nu e_m'+e_m\nu'S'H'+\nu'\nu\ e_me_m',\label{eq-5b}\\
-XY'&=GH'+GT\nu e_m'+e_n\mu'S'H'+\mu'\nu\ e_ne_m',\label{eq-5c}
-\end{align}
+  \begin{align}
+    XX' & = GMG' + GT\mu e_n' + e_n\mu'T'G' + \mu'\mu\ e_ne_n',\label{eq-5a} \\
+    YY' & = HNH' + HS\nu e_m' + e_m\nu'S'H' + \nu'\nu\ e_me_m',\label{eq-5b} \\
+    XY' & = GH' + GT\nu e_m' + e_n\mu'S'H' + \mu'\nu\ e_ne_m',\label{eq-5c}
+  \end{align}
 \end{subequations}
-where $M:=TT'$ and $N:=SS'$. Note that $N=M^{-1}$.
+where $M := TT'$ and $N := SS'$. Note that $N = M^{-1}$.
 
-Define an $n\times \frac12 p(p+1)$ matrix $G\star G$ which has a column
-for each pair of indices $1\leq s\leq t\leq p$. Columns of $G\star G$ are elementwise products of columns of $G$ according to
+Define an $n \times \frac12 p(p + 1)$ matrix $G \star G$ which has a column for
+each pair of indices $1 \leq s \leq t \leq p$. Columns of $G \star G$ are
+elementwise products of columns of $G$ according to
 \begin{equation}
-(G\star G)_{(s,t)}:=\begin{cases}2g_sg_t&\text{ if }s\neq t,\\
-g_s^2&\text{ if }s=s.
-\end{cases}
+  (G \star G)_{(s,t)} := \begin{cases}
+                           2g_sg_t & \text{ if }s \neq t, \\
+                           g_s^2   & \text{ if }s = s.
+                         \end{cases}
 \end{equation}
-Matrix $H\star H$ is defined in the same way, using the colums of $H$. Next define the $\frac12 p(p+1)$-element vectors $\overrightarrow{m}$ and $\overrightarrow{n}$, which have the 
-diagonal and subdiagonal elements of $M$ and $N$, in the same order as the
-columns of $G\star G$ and $H\star H$. Then $\text{diag}(GMG')=(G\star G)\overrightarrow{m}$ and
-$\text{diag}(HNH')=(H\star H)\overrightarrow{n}$.
+Matrix $H \star H$ is defined in the same way, using the colums of $H$. Next
+define the $\frac12 p(p + 1)$-element vectors $\overrightarrow{m}$ and
+$\overrightarrow{n}$, which have the diagonal and subdiagonal elements of $M$
+and $N$, in the same order as the columns of $G \star G$ and $H \star H$. Then
+$\text{diag}(GMG') = (G \star G)\overrightarrow{m}$ and
+$\text{diag}(HNH') = (H \star H)\overrightarrow{n}$.
 
 In addition to \eqref{eq-5a}-\eqref{eq-5c} we have
 \begin{subequations}
-\begin{align}
-\alpha e_m'&=(G\star G)\overrightarrow{m} e_m'+2GT\mu e_m'+\mu'\mu e_ne_m',\label{eq-7a}\\
-e_n\beta'&=e_n\overrightarrow{n}'(H\star H)'+2e_n\nu'S'H'+\nu'\nu e_ne_m'.\label{eq-7b}
-\end{align}
+  \begin{align}
+    \alpha e_m' & = (G \star G)\overrightarrow{m} e_m' + 2GT\mu e_m' + \mu'\mu e_ne_m',\label{eq-7a}  \\
+    e_n\beta'   & = e_n\overrightarrow{n}'(H \star H)' + 2e_n\nu'S'H' + \nu'\nu e_ne_m'.\label{eq-7b}
+  \end{align}
 \end{subequations}
-Substituting \eqref{eq-5a}-\eqref{eq-5c} and \eqref{eq-7a}-\eqref{eq-7b} in equation \eqref{eq-dmat} gives
+Substituting \eqref{eq-5a}-\eqref{eq-5c} and \eqref{eq-7a}-\eqref{eq-7b} in
+equation \eqref{eq-dmat} gives
 \begin{multline}
-D=-2GH'+2GT\eta e_m'-2e_n\eta'S'H'+\\(G\star G)\overrightarrow{m} e_m'+e_n\overrightarrow{n}'(H\star H)'+\eta'\eta e_ne_m',\label{eq-symm}
+  D = -2GH' + 2GT\eta e_m' - 2e_n\eta'S'H' +                                                                  \\
+  (G \star G)\overrightarrow{m} e_m' + e_n\overrightarrow{n}'(H \star H)' + \eta'\eta e_ne_m',\label{eq-symm}
 \end{multline}
-with $\eta:=\mu-\nu$.
+with $\eta := \mu - \nu$.
 
-We now take what could be described as a "row-oriented approach", by eliminating all references to $H$ and $S$ from equation \eqref{eq-symm}.
-Define $F:=D+2GH'$ and $\tilde F:=J_nF$. Then, from \eqref{eq-symm},
+We now take what could be described as a "row-oriented approach", by eliminating
+all references to $H$ and $S$ from equation \eqref{eq-symm}. Define
+$F := D + 2GH'$ and $\tilde F := J_nF$. Then, from \eqref{eq-symm},
 \begin{equation}
-\tilde F=2J_nGT\eta e_m'+J_n(G\star G)\overrightarrow{m} e_m'\label{eq-feq}
+  \tilde F = 2J_nGT\eta e_m' + J_n(G \star G)\overrightarrow{m} e_m'\label{eq-feq}
 \end{equation}
-Since $C=GH'$ it follows that $D+2GH'=D-J_nDJ_m$ and 
-all $m$ columns of $\tilde F$ are identical to the centered row-averages of $D$.
+Since $C = GH'$ it follows that $D + 2GH' = D - J_nDJ_m$ and all $m$ columns of
+$\tilde F$ are identical to the centered row-averages of $D$.
 
-Assume $\tilde F$ is non-zero, i.e. that not all row-sums of $D$ are the same. Take any of its columns, name it $f$. 
-Define a matrix 
+Assume $\tilde F$ is non-zero, i.e. that not all row-sums of $D$ are the same.
+Take any of its columns, name it $f$. Define a matrix
 \begin{equation}
-K:=\begin{bmatrix}2J_nG&J_n(G\star G)\end{bmatrix}.\label{eq-kdef}
+  K := \begin{bmatrix}
+         2J_nG & J_n(G \star G)
+       \end{bmatrix}.\label{eq-kdef}
 \end{equation}
 We must have
 \begin{equation}
 f=\begin{bmatrix}2J_nG&J_n(G\star G)\end{bmatrix}\begin{bmatrix}T\eta\\\overrightarrow{m}\end{bmatrix}.\label{eq-linsys}
 \end{equation}
-This is a system of $n$ linear equations in $\frac12 p(p+3)$ unknowns. Suppose it has a unique solution for $T\eta$ and $\overrightarrow{m}$. If $n\geq\frac12 p(p+3)$ then the solution can be computed by inverting any non-singular submatrix
-of order $\frac12 p(p+3)$. No matter how we choose the submatrix, the solution will be the same. From the solution of \eqref{eq-linsys} use the elements
-of $\overrightarrow{m}$ to reconstruct $M$. Use any decomposition method to find $T$ from $M=TT'$ and use $T$ to find $\eta$ and $S=(T')^{-1}$.
-Assume without loss of generality that $\nu=0$. Then $Y=HS$ and $X=GT+e_n\mu'$
-gives a solution, with $Y$ column-centered.
+This is a system of $n$ linear equations in $\frac12 p(p + 3)$ unknowns. Suppose
+it has a unique solution for $T\eta$ and $\overrightarrow{m}$. If
+$n \geq \frac12 p(p + 3)$ then the solution can be computed by inverting any
+non-singular submatrix of order $\frac12 p(p + 3)$. No matter how we choose the
+submatrix, the solution will be the same. From the solution of \eqref{eq-linsys}
+use the elements of $\overrightarrow{m}$ to reconstruct $M$. Use any
+decomposition method to find $T$ from $M = TT'$ and use $T$ to find $\eta$ and
+$S = (T')^{-1}$. Assume without loss of generality that $\nu = 0$. Then $Y = HS$
+and $X = GT + e_n\mu'$ gives a solution, with $Y$ column-centered.
 
-If the system of equations \eqref{eq-dmat} has a solution, then the linear equations \eqref{eq-linsys} are a consequence of \eqref{eq-dmat}, and thus have at least one solution with a positive definite matrix $M$. If \eqref{eq-linsys} has more than one solution, because the matrix $K$ has rank less than $\frac12p(p+3)$, then we must find a solution for which $M$ is positive definite. Conversely, if \eqref{eq-linsys} has a solution with $M$ positive definite then system \eqref{eq-dmat} has a solution with dimension $p=\text{rank}(C)$.
+If the system of equations \eqref{eq-dmat} has a solution, then the linear
+equations \eqref{eq-linsys} are a consequence of \eqref{eq-dmat}, and thus have
+at least one solution with a positive definite matrix $M$. If \eqref{eq-linsys}
+has more than one solution, because the matrix $K$ has rank less than
+$\frac12p(p + 3)$, then we must find a solution for which $M$ is positive
+definite. Conversely, if \eqref{eq-linsys} has a solution with $M$ positive
+definite then system \eqref{eq-dmat} has a solution with dimension
+$p = \text{rank}(C)$.
 
-Note that it is also possible to go the "column-oriented" way, by defining 
+Note that it is also possible to go the "column-oriented" way, by defining
 $\tilde F$ as $FJ_m$, which now has identical rows depending on $N$ and $S$.
-This also leads to a solution for $X$ and $Y$, which in the perfect case should be identical to the "row-oriented" one. We went the "row-oriented" way because we have the practical situations in mind in which $n$ is larger, often much larger, than $m$. And we can always find the "column-oriented" solution by applying the "row-oriented" calculations to the transpose of $D$.
-For example, if all row-sums of $D$ are the same then $\tilde F=0$ and our "row-oriented" technique fails. In this case we can analyze the transpose of $D$ instead, which may have  non-constant row-sums.
+This also leads to a solution for $X$ and $Y$, which in the perfect case should
+be identical to the "row-oriented" one. We went the "row-oriented" way because
+we have the practical situations in mind in which $n$ is larger, often much
+larger, than $m$. And we can always find the "column-oriented" solution by
+applying the "row-oriented" calculations to the transpose of $D$. For example,
+if all row-sums of $D$ are the same then $\tilde F = 0$ and our "row-oriented"
+technique fails. In this case we can analyze the transpose of $D$ instead, which
+may have non-constant row-sums.
 
 \sectionbreak
 
 # Artificial Example
 
-This section has in-line R code and R output for a $9\times 3$ artificial example. In the code we use the same names (in lower case) for the key matrices as in our formulas (in upper case). The full-rank decomposition of $C$ is computed from its singular value decomposition. Note that the solutions, which are $\hat X$ and $\hat Y$ in the output, are not the same as $X$ and $Y$ used to generate the data because of the rotational and translational indeterminacy. But the distances $\hat D$ between $\hat X$ and $\hat Y$ are the same as the distances $D$ between $X$ and $Y$, which is what matters.
+This section has in-line R code and R output for a $9 \times 3$ artificial
+example. In the code we use the same names (in lower case) for the key matrices
+as in our formulas (in upper case). The full-rank decomposition of $C$ is
+computed from its singular value decomposition. Note that the solutions, which
+are $\hat X$ and $\hat Y$ in the output, are not the same as $X$ and $Y$ used to
+generate the data because of the rotational and translational indeterminacy. But
+the distances $\hat D$ between $\hat X$ and $\hat Y$ are the same as the
+distances $D$ between $X$ and $Y$, which is what matters.
 
-```{r arti}
+```{r}
+#| label: arti
+
 x <- matrix(c(1:9, 1, 2, 3, 1, 2, 3, 1, 2, 3), 9, 2) / 10
 y <- matrix(c(1, 1, -2, 1, 0, -1), 3, 2)
 matrixPrint(x, digits = 2, width = 4)
@@ -279,43 +336,46 @@ matrixPrint(dhat, digits = 4, width = 6)
 
 # Imperfect Data
 
-For real data the system \eqref{eq-dmat} will generally not have a perfect solution 
-for any $p$ (i.e. there is no Euclidean configuration for which the $D$
-are squared distances). At various steps our technique necessarily differs from the technique in the perfect case.
+For real data the system \eqref{eq-dmat} will generally not have a perfect
+solution for any $p$ (i.e. there is no Euclidean configuration for which the $D$
+are squared distances). At various steps our technique necessarily differs from
+the technique in the perfect case.
 
-First we have to pick a $p$. This can be done a priori, for instance
-by using the MDS default $p=2$. Or we can pick $p$ by eye-balling the
-singular values of $C$ and try to find an "elbow" familiar from 
-factor analysis. Instead of a full rank decomposition of $C$ we
-then use a rank $p$ approximation $GH'$, for example by using the
-$p$ dominant singular values and their singular vectors. 
+First we have to pick a $p$. This can be done a priori, for instance by using
+the MDS default $p = 2$. Or we can pick $p$ by eye-balling the singular values
+of $C$ and try to find an "elbow" familiar from factor analysis. Instead of a
+full rank decomposition of $C$ we then use a rank $p$ approximation $GH'$, for
+example by using the $p$ dominant singular values and their singular vectors.
 
 Now proceed with the calculations as in the perfect case. For imperfect data
-with $GH'\neq C$ the columns of $F$ from \eqref{eq-dmat} are not identical any
-more, and not equal to the centered row-means. So picking different columns will give different results. In some cases it may make sense to choose $f$ equal to the row-averages of $F$. But note that, no matter how good or bad the fit of 
-$GH'$ to $C$ is, the row-averages of $F$ are always equal to the row-averages of $D$. There are other options, as long as they give the correct result in the perfect case. Thus picking the row-wise median or minimum or maximum is also a 
-possibility. Remember that a rule that makes $f$ small (in norm) will make $M$, and consequently $T$ and $X$, small and will make $S$ and $Y$ large. 
+with $GH' \neq C$ the columns of $F$ from \eqref{eq-dmat} are not identical any
+more, and not equal to the centered row-means. So picking different columns will
+give different results. In some cases it may make sense to choose $f$ equal to
+the row-averages of $F$. But note that, no matter how good or bad the fit of
+$GH'$ to $C$ is, the row-averages of $F$ are always equal to the row-averages of
+$D$. There are other options, as long as they give the correct result in the
+perfect case. Thus picking the row-wise median or minimum or maximum is also a
+possibility. Remember that a rule that makes $f$ small (in norm) will make $M$,
+and consequently $T$ and $X$, small and will make $S$ and $Y$ large.
 
-In some cases we can actually use the fact that the columns of $F$ are
-different to perform $m$ analyses, using each column of $F$ in turn. The $m$ different results then give some information about the fit and the stability of
-the solution. 
+In some cases we can actually use the fact that the columns of $F$ are different
+to perform $m$ analyses, using each column of $F$ in turn. The $m$ different
+results then give some information about the fit and the stability of the
+solution.
 
-In the next step of the technique we may find that
-system \eqref{eq-linsys} is overdetermined and not solvable, 
-or singular with multiple solutions. The usual case will be 
-that no exact solution exists. As a compromise in that case we 
-can use the Moore-Penrose inverse to compute the
-minimum norm least squares solution. 
+In the next step of the technique we may find that system \eqref{eq-linsys} is
+overdetermined and not solvable, or singular with multiple solutions. The usual
+case will be that no exact solution exists. As a compromise in that case we can
+use the Moore-Penrose inverse to compute the minimum norm least squares
+solution.
 
-And finally, and this is the most
-troublesome problem, we may find that $M$ constructed from
-the least squares solution is not positive definite.  In that case
-case we cannot find a $T$ such that $M=TT'$ and we are stuck.
-As this happens, for now, we give up.
+And finally, and this is the most troublesome problem, we may find that $M$
+constructed from the least squares solution is not positive definite. In that
+case case we cannot find a $T$ such that $M = TT'$ and we are stuck. As this
+happens, for now, we give up.
 
-Of course these problems will be less serious if the fit is good, i.e.
-if the elements of $D$ are approximately squared Euclidean distances.
-
+Of course these problems will be less serious if the fit is good, i.e. if the
+elements of $D$ are approximately squared Euclidean distances.
 
 \sectionbreak
 
@@ -325,12 +385,20 @@ if the elements of $D$ are approximately squared Euclidean distances.
 
 Our first real example is a matrix of airline distances between 18 cities. The
 cities are
-```{r airlineData, echo = FALSE}
+
+```{r}
+#| label: airlineData
+#| echo: false
+
 source("airlineData.R")
 print(as.matrix(row.names(airline), 18, 1), quote = FALSE)
 ```
 We start by computing the metric MDS solution on the full matrix.
-```{r airfull, echo = FALSE}
+
+```{r}
+#| label: airfull
+#| echo: false
+
 dd <- airline^2
 da <- apply(dd, 1, mean)
 dm <- mean(dd)
@@ -339,22 +407,46 @@ ea <- eigen(ca)
 xa <- ea$vectors[,1:2] %*% diag(sqrt(ea$values[1:2]))
 ```
 The following two plots give the configuration and the D-Dhat plot for the
-airline data. The East-West and North-South dimensions show up clearly in the plot.
-```{r acomplot, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Airline Distances, Configuration Plot, Complete Data"}
+airline data. The East-West and North-South dimensions show up clearly in the
+plot.
+
+```{r}
+#| label: acomplot
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Airline Distances, Configuration Plot, Complete Data"
+
 par(pty="s")
 plot(xa, type = "n", xlab = "dim 1", ylab = "dim 2")
 text(xa, row.names(airline), col = "RED", cex = 1.5)
 ```
 
+```{r}
+#| label: acomplot2
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Airline Distances, Dist-Dhat Plot, Complete Data"
 
-```{r acomplot2, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Airline Distances, Dist-Dhat Plot, Complete Data"}
 plot(as.dist(airline), dist(xa), col = "BLUE", pch = 19, cex = 1.5,
      xlab = "D", ylab = "DHAT")
 ```
-We now create a $9\times 9$ off-diagonal submatrix by using the even-numbered cities as rows and the rest as columns. The transpose of the submatrix is 
-also analyzed. Although the two dimensions from the complete solution are
-still there the plots have some distortions
-```{r airect1, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Airline Distances, Configuration Plot, Off-diagonal Submatrix"}
+We now create a $9 \times 9$ off-diagonal submatrix by using the even-numbered
+cities as rows and the rest as columns. The transpose of the submatrix is also
+analyzed. Although the two dimensions from the complete solution are still there
+the plots have some distortions
+
+```{r}
+#| label: airect1
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Airline Distances, Configuration Plot, Off-diagonal Submatrix"
+
 par(pty="s")
 hr <- schoenemann(airlineRect^2)
 plot(rbind(hr$xhat, hr$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
@@ -367,7 +459,14 @@ plot(rbind(hr$xhat, hr$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
        col = "BLUE",
        cex = 1.5)
 ```
-```{r airect2, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Airline Distances, Configuration Plot, Off-diagonal Submatrix, Transposed"}
+```{r}
+#| label: airect2
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Airline Distances, Configuration Plot, Off-diagonal Submatrix, Transposed"
+
 hc <- schoenemann(t(airlineRect^2))
 plot(rbind(hc$xhat, hc$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
   text(hc$xhat,
@@ -382,20 +481,23 @@ plot(rbind(hc$xhat, hc$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
 
 ## Gold
 
-Our next example is the same as the one in @heiser_deleeuw_A_79.
-The data are taken from the *Power in the Classroom* study of @gold_58.
-Children in elementary school, divided into eight groups, judge how important
-17 characteristics of their classmates are for their power in the classroom. 
-Data are the times each of properties were rated as "very important" by the
-eight age-sex groups. The groups have three-digit codes in the joint
-configuration plot. The first digit indicates the school grade (third vs
-higher), the second the gender of the respondent, the third indicates
-the importance of the property rated for males or females. 
+Our next example is the same as the one in @heiser_deleeuw_A_79. The data are
+taken from the *Power in the Classroom* study of @gold_58. Children in
+elementary school, divided into eight groups, judge how important 17
+characteristics of their classmates are for their power in the classroom. Data
+are the times each of properties were rated as "very important" by the eight
+age-sex groups. The groups have three-digit codes in the joint configuration
+plot. The first digit indicates the school grade (third vs higher), the second
+the gender of the respondent, the third indicates the importance of the property
+rated for males or females.
 
-We first give the configuration plot and the Dist-Dhat plot. For the 
-" f average" analysis.
+We first give the configuration plot and the Dist-Dhat plot. For the " f
+average" analysis.
 
-```{r gold, echo = FALSE}
+```{r}
+#| label: gold
+#| echo: false
+
 gold <-
 structure(list(V1 = c(13.5, 1, 13.5, 16.5, 12, 9.5, 2, 9.5, 5.5, 
 5.5, 15, 3, 5.5, 11, 16.5, 8, 5.5), V2 = c(13, 17, 6.5, 3, 4, 
@@ -422,24 +524,44 @@ hgold7 <- schoenemann(goldMatrix^2, fsel = 7)
 hgold8 <- schoenemann(goldMatrix^2, fsel = 8)
 ```
 
+```{r}
+#| label: jplot
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Gold Data, Configuration Plot"
 
-```{r jplot, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Gold Data, Configuration Plot"}
 par(pty="s")
 plot(rbind(hgold0$xhat, hgold0$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
 text(hgold0$xhat, as.character(1:17), col = "BLUE", cex = 2)
 text(hgold0$yhat, goldLabels, col = "RED", cex = 2)
 ```
 
-```{r dplot, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Gold Data, Dist-Dhat Plot"}
+```{r}
+#| label: dplot
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Gold Data, Dist-Dhat Plot"
+
 par(pty="s")
 plot(hgold0$d, hgold0$dhat, cex = 2, col = "BLUE", pch = 19, xlab = "D", ylab = "DHAT")
 ```
-Next, we perform an analysis for each of the columns of $F$ separately, and
-we plot the solutions for the column scores $Y$ in a single plot (without
-matching them with rotation and translation). We overlay the result with the
-result of the average analysis (in red).
+Next, we perform an analysis for each of the columns of $F$ separately, and we
+plot the solutions for the column scores $Y$ in a single plot (without matching
+them with rotation and translation). We overlay the result with the result of
+the average analysis (in red).
 
-```{r yplot, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Gold Data, Column Configuration from Eight Column and One Average Analysis"}
+```{r}
+#| label: yplot
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Gold Data, Column Configuration from Eight Column and One Average Analysis"
+
 par(pty="s")
 plot(rbind(hgold1$y,hgold2$y,hgold3$y,hgold4$y,hgold5$y,hgold6$y,hgold7$y,hgold8$y),type="n", xlab = "dim 1", ylab = "dim 2")
 text(hgold1$y, as.character(1:8), col = "BLUE", cex = 2)
@@ -453,13 +575,15 @@ text(hgold8$y, as.character(1:8), col = "BLUE", cex = 2)
 text(hgold0$y, goldLabels, col = "RED", cex = 2)
 ```
 
-The solution seems to be quite stable over column-selection. It should be noted that if we go to three dimensions, or if we transpose the analysis, the matrix
+The solution seems to be quite stable over column-selection. It should be noted
+that if we go to three dimensions, or if we transpose the analysis, the matrix
 $M$ is no longer positive definite.
 
 ## Roskam
 
-In 1968 @roskam_68 asked 39 of the staff members of the Psychology Laboratory
-at Nijmegen University to rank the nine different departments in the laboratory as to the importance for their work. The departments are
+In 1968 @roskam_68 asked 39 of the staff members of the Psychology Laboratory at
+Nijmegen University to rank the nine different departments in the laboratory as
+to the importance for their work. The departments are
 
 1. Social Psychology
 2. Educational and Developmental Psychology
@@ -471,18 +595,24 @@ at Nijmegen University to rank the nine different departments in the laboratory 
 8. Test Construction and Validation
 9. Physiological and Animal Psychology
 
-Thus the data are 39 rank orders. It seems
-rather procrustean to approximate  discrete rank numbers by
-continuous distances. Moreover the data are conditional, which means that
-a rank equal to five for staff member A may not have the same "meaning" as a five for staff member B. Nevertheless we use these data for our example, since it is after all an off-diagonal rectangular matrix with positive numbers.
+Thus the data are 39 rank orders. It seems rather procrustean to approximate
+discrete rank numbers by continuous distances. Moreover the data are
+conditional, which means that a rank equal to five for staff member A may not
+have the same "meaning" as a five for staff member B. Nevertheless we use these
+data for our example, since it is after all an off-diagonal rectangular matrix
+with positive numbers.
 
-All rows of $D$ add up to 45, so if we were to choose row-means for $f$ they would
-be exactly zero. If we use all of the 9 rows of $F$ in turn, then for
-six of them we find that $M$ is indefinite. The configurations for rows 1, 2, and 7 are plotted. There is clearly a worse fit, and much less stability, than
-in the Gold example. The most important difference between the three analyses
-is the relative size of the row and column configurations.
+All rows of $D$ add up to 45, so if we were to choose row-means for $f$ they
+would be exactly zero. If we use all of the 9 rows of $F$ in turn, then for six
+of them we find that $M$ is indefinite. The configurations for rows 1, 2, and 7
+are plotted. There is clearly a worse fit, and much less stability, than in the
+Gold example. The most important difference between the three analyses is the
+relative size of the row and column configurations.
 
-```{r rosdata, echo = FALSE}
+```{r}
+#| label: rosdata
+#| echo: false
+
 roskam <-
 structure(list(SOC = c("1", "1", "1", "1", "7", "6", "2", "4", 
 "4", "3", "4", "3", "2", "2", "7", "5", "5", "9", "9", "8", "7", 
@@ -523,7 +653,14 @@ h2 <- schoenemann(roskamNumeric, fsel = 2)
 h7 <- schoenemann(roskamNumeric, fsel = 7)
 ```
 
-```{r rosplot1, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Roskam Data, Configuration Plot from Column 1"}
+```{r}
+#| label: rosplot1
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Roskam Data, Configuration Plot from Column 1"
+
 par(pty="s")
 plot(rbind(h1$xhat, h1$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
   text(h1$xhat,
@@ -535,7 +672,14 @@ plot(rbind(h1$xhat, h1$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
        col = "BLUE",
        cex = 1.5)
 ```
-```{r rosplot2, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Roskam Data, Configuration Plot from Column 2"}
+```{r}
+#| label: rosplot2
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Roskam Data, Configuration Plot from Column 2"
+
 par(pty="s")
 plot(rbind(h2$xhat, h2$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
   text(h2$xhat,
@@ -547,7 +691,14 @@ plot(rbind(h2$xhat, h2$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
        col = "BLUE",
        cex = 1.5)
 ```
-```{r rosplot3, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Roskam Data, Configuration Plot from Column 7"}
+```{r}
+#| label: rosplot3
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Roskam Data, Configuration Plot from Column 7"
+
 par(pty="s")
   plot(rbind(h7$xhat, h7$yhat), type = "n", xlab = "dim 1", ylab = "dim 2")
   text(h7$xhat,
@@ -559,43 +710,47 @@ par(pty="s")
        col = "BLUE",
        cex = 1.5)
 ```
-The D-Dhat plot for the column seven solution shows the poor fit (due mostly
-to fitting distances to rank numbers). The red line shows the average Dhat 
-value for each distance category, indicating at least some degree of 
-monotonicity.
+The D-Dhat plot for the column seven solution shows the poor fit (due mostly to
+fitting distances to rank numbers). The red line shows the average Dhat value
+for each distance category, indicating at least some degree of monotonicity.
 
-```{r rosdd, fig.align = "center", fig.width = 10, fig.height = 10, echo = FALSE, fig.cap = "Roskam Data, D-DHAT plot, Column 7 Solution"}
+```{r}
+#| label: rosdd
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 10
+#| echo: false
+#| fig-cap: "Roskam Data, D-DHAT plot, Column 7 Solution"
+
 plot(h7$d, h7$dhat, xlab = "D", ylab = "DHAT", pch = 19, col = "BLUE", cex = 1.5)
 gx <- ifelse(outer(as.vector(h7$d), 1:9, "=="), 1, 0)
 mx <- crossprod(gx, as.vector(h7$dhat)) / colSums(gx)
 gg <- cbind(1:9, mx)
 lines(gg, col = "RED", lwd = 4)
-``` 
+```
 
 \sectionbreak
 
 # Software
 
-The function schoenemann() in the file schoenemann.R implements the "row-oriented" solution to perfect or imperfect data. We choose a value
-of $p$, with $p=2$ the default. The singular value decomposition is used to approximate $D$
-by a matrix of rank $p$. We then compute $\tilde F$. If the parameter
-fsel is zero, $f$ are the row-averages of $\tilde F$. If fsel is equal to
-$j$ then $f$ is column $j$ of $\tilde F$. The R function lm.fit() is used
-to find the least squares solution of the linear system ..., and the
-program gives a warning if the estimated rank of $K$ is less than
-its number of columns $\frac12 p(p+3)$. From the solution we
-reconstruct $M$, and again a warning is issued if $M$ is not 
-positive definite. The R function eigen() uses $M=L\Lambda L'$ to test for positive definiteness. If some eigenvalues are negative then
-we replace them by their absolute values. There is not real
-convincing justification for this, except the lame excuse 
-that if $M$, which is of order $p$, only has small negative eigenvalues
-then we only make a small unjustified adjustment.  The function 
-schoenemann() does return $\tilde F$, $K$, and $M$ so we can 
-do some post-hoc analyses to see where things went wrong. In addition
-solutions $X$ and $Y$, with corresponding $D(X,Y)$ are returned, as well as the
-input matrix $D$.
-
-
+The function schoenemann() in the file schoenemann.R implements the
+"row-oriented" solution to perfect or imperfect data. We choose a value of $p$,
+with $p = 2$ the default. The singular value decomposition is used to
+approximate $D$ by a matrix of rank $p$. We then compute $\tilde F$. If the
+parameter fsel is zero, $f$ are the row-averages of $\tilde F$. If fsel is equal
+to $j$ then $f$ is column $j$ of $\tilde F$. The R function lm.fit() is used to
+find the least squares solution of the linear system ..., and the program gives
+a warning if the estimated rank of $K$ is less than its number of columns
+$\frac12 p(p + 3)$. From the solution we reconstruct $M$, and again a warning is
+issued if $M$ is not positive definite. The R function eigen() uses
+$M = L\Lambda L'$ to test for positive definiteness. If some eigenvalues are
+negative then we replace them by their absolute values. There is not real
+convincing justification for this, except the lame excuse that if $M$, which is
+of order $p$, only has small negative eigenvalues then we only make a small
+unjustified adjustment. The function schoenemann() does return $\tilde F$, $K$,
+and $M$ so we can do some post-hoc analyses to see where things went wrong. In
+addition solutions $X$ and $Y$, with corresponding $D(X,Y)$ are returned, as
+well as the input matrix $D$.
 
 \sectionbreak
 

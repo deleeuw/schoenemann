@@ -109,6 +109,7 @@
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 
 \usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -267,6 +268,10 @@
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
 \hypersetup{
   pdftitle={Metric Multidimensional Unfolding},
   pdfauthor={Jan de Leeuw},
@@ -280,21 +285,20 @@
 
 \title{Metric Multidimensional Unfolding}
 \author{Jan de Leeuw}
-\date{March 4, 2026}
+\date{October 27, 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
 We review Schönemann's technique to reconstruct a configuration of
 \(n+m\) points from an \(n\times m\) off-diagonal submatrix of the
 distance matrix. The technique is meant for error-free distances, but we
-pat spacial attention to what happens if it is applied to
-dissimilarities which may not have a perfect representation in Euclidean
+pay special attention to what happens if it is applied to
+dissimilarities which do not have a perfect representation in Euclidean
 space. Examples are analyzed and R programs are provided.
 \end{abstract}
 
 \renewcommand*\contentsname{Table of contents}
 {
-\hypersetup{linkcolor=}
 \setcounter{tocdepth}{3}
 \tableofcontents
 }
@@ -323,15 +327,15 @@ given its current more computational form by Torgerson
 
 Suppose \(D\) is a square, symmetric, and hollow non-negative matrix
 with dissimilarities between \(n\) objects. Define \begin{equation}
-C:=-\frac12 J_n(D\times D)J_n
-\end{equation} where \(J_n=I-n^{-1}e_ne_n'\) is the centering matrix,
-\(e_n\) has all its elements equal to one, and \(D\times D\) is the
-elementwise square of \(D\). The SYHTG theorem says that there is an
-\(n\times p\) matrix \(X\) such that \begin{equation}
-d_{ij}=\sqrt{\sum_{s=1}^p(x_{is}-x_{js})^2}
+  C := -\frac12 J_n(D \times D)J_n
+\end{equation} where \(J_n = I - n^{-1}e_ne_n'\) is the centering
+matrix, \(e_n\) has all its elements equal to one, and \(D \times D\) is
+the elementwise square of \(D\). The SYHTG theorem says that there is an
+\(n \times p\) matrix \(X\) such that \begin{equation}
+  d_{ij} = \sqrt{\sum_{s=1}^p(x_{is} - x_{js})^2}
 \end{equation} if and only if \(C\) is positive semidefinite with rank
-\(r\leq p\). Moreover in that case \(n\times r\) solutions \(X\) can be
-found from any full rank decomposition \(C=XX'\).
+\(r \leq p\). Moreover in that case \(n \times r\) solutions \(X\) can
+be found from any full rank decomposition \(C = XX'\).
 
 The SYHTG result has an existence part, which says that a Euclidean
 representation exists if and only if the matrix \(C\) is positive
@@ -347,12 +351,12 @@ dissimilarities can be found by using the \(p\) largest eigenvalues of
 Multidimensional Unfolding (MDU) is a special case of MDS in which there
 are two disjoint sets of objects. The first set has \(n\) elements, the
 second set has \(m\) elements. The non-negative matrix \(D\) is
-\(n\times m\) and contains the dissimilarities between the elements of
+\(n \times m\) and contains the dissimilarities between the elements of
 the first and second set. The within-set dissimilarities are missing.
 There were some tentative attempts to generalize the SYHTG theorem to
-off-diagonal data of this form, but not much was achieved until the work
-of Schönemann (\citeproc{ref-schoenemann_70}{1970}), which also has a
-review of the accomplishments until 1970.
+off-diagonal data of this form, but not much was accomplished until the
+work of Schönemann (\citeproc{ref-schoenemann_70}{1970}), which also has
+a review of the tentative earlier results.
 
 Schönemann's technique is developed for perfect data, i.e.~for
 dissimilarities that can be faithfully represented as distances in
@@ -364,124 +368,127 @@ Unlike the SYHTG approximation part, which has a clear least squares
 interpretation, these calculations proceed by what Joe Kruskal used to
 call ``ignoring errors''.
 
-Heiser and De Leeuw (\citeproc{ref-heiser_deleeuw_A_79}{1979}) present
+{Heiser and de Leeuw} (\citeproc{ref-heiser_deleeuw_A_79}{1979}) present
 various variations of the Schönemann technique, and review the
-literature until 1979. They also compare the results on various examples
-with metric MDS results obtained from smacof, the standard iterative
-least squares MDS technique. And they provide an example of applying
-their Schönemann variations on a real data analysis example. Although
-the standard MDS textbook of Borg and Groenen
+literature until 1979. They also compare the results on an actual
+example with the metric MDS results obtained from smacof, the standard
+iterative least squares MDS technique. Not much work has been done since
+1980. Although the standard MDS textbook of Borg and Groenen
 (\citeproc{ref-borg_groenen_05}{2005}) pays a lot of attention to
 unfolding, the work of Schönemann is only mentioned in a single
 footnote.
 
 \section{Perfect Data}\label{perfect-data}
 
-Suppose \(D\) is an \(n\times m\) matrix with non-negative numbers. The
+Suppose \(D\) is an \(n \times m\) matrix with non-negative numbers. The
 problem we study in this paper is solving the system of equations
 \begin{equation}
-d_{ij}=\sum_{s=1}^p(x_{is}-y_{js})^2.\label{eq-d}
-\end{equation} for an \(n\times p\) matrix \(X\) and an \(m\times p\)
+  d_{ij} = \sum_{s=1}^p(x_{is} - y_{js})^2.\label{eq-d}
+\end{equation} for an \(n \times p\) matrix \(X\) and an \(m \times p\)
 matrix \(Y\). In matrix notation \eqref{eq-d} becomes \begin{equation}
-D=\alpha e_m'+e_n\beta'-2XY',\label{eq-dmat}
-\end{equation} with \(\alpha:=\text{diag}(XX')\) and
-\(\beta:=\text{diag}(YY')\) and with \(e_n\) and \(e_m\) vectors of
+  D = \alpha e_m' + e_n\beta' - 2XY',\label{eq-dmat}
+\end{equation} with \(\alpha := \text{diag}(XX')\) and
+\(\beta := \text{diag}(YY')\) and with \(e_n\) and \(e_m\) vectors of
 appropriate length with all elements equal to one. In this section we
 study the case in which we have ``perfect data'', i.e.~in which
 \eqref{eq-dmat} has a solution \((X,Y)\) for some \(p\). Our problem is
 to recover \(X\) and \(Y\) from \(D\).
 
-Suppose \(J_n=I-n^{-1}e_ne_n'\) and \(J_m=I-m^{-1}e_me_m'\) are
+Suppose \(J_n = I - n^{-1}e_ne_n'\) and \(J_m = I - m^{-1}e_me_m'\) are
 centering matrices. Then \begin{equation}
-C:=-\frac12 J_nDJ_m=J_nXY'J_m.\label{eq-cdef}
-\end{equation} Suppose \(C\) has rank \(p\) and \(C=GH'\) is any
+  C := -\frac12 J_nDJ_m = J_nXY'J_m.\label{eq-cdef}
+\end{equation} Suppose \(C\) has rank \(p\) and \(C = GH'\) is any
 full-rank decomposition of \(C\). Being able to construct \(X\) and
 \(Y\) from \(C\) assumes that \(J_nX\) and \(J_mY\) have the same rank
 as \(X\) and \(Y\), which means that we assume that \(e_n\) is not in
 the column-space of \(X\) and \(e_m\) is not in the column space of
 \(Y\). If that assumption is violated the full-rank decomposition has
-rank \(q<p\). In an extreme case, suppose \(Y=e_my'\) for some
-\(p\)-vector \(y\). Then all rows of \(D\) are the same and \(C=0\).
+rank \(q < p\). In an extreme case, suppose \(Y = e_my'\) for some
+\(p\)-vector \(y\). Then all rows of \(D\) are the same and \(C = 0\).
 
-From \eqref{eq-cdef} it follows that there exist \(p\times p\)
+From \eqref{eq-cdef} it follows that there exist \(p \times p\)
 nonsingular matrices \(T\) and \(S\) and vectors \(\mu\) and \(\nu\) of
 length \(p\) such that \begin{subequations}
-\begin{align}
-X&=GT+e_n\mu',\\
-Y&=HS+e_m\nu',\\
-TS'&=I.
-\end{align}
+  \begin{align}
+    X   & = GT + e_n\mu', \\
+    Y   & = HS + e_m\nu', \\
+    TS' & = I.
+  \end{align}
 \end{subequations} Consequently \begin{subequations}
-\begin{align}
-XX'&=GMG'+GT\mu e_n'+e_n\mu'T'G'+\mu'\mu\ e_ne_n',\label{eq-5a}\\
-YY'&=HNH'+HS\nu e_m'+e_m\nu'S'H'+\nu'\nu\ e_me_m',\label{eq-5b}\\
-XY'&=GH'+GT\nu e_m'+e_n\mu'S'H'+\mu'\nu\ e_ne_m',\label{eq-5c}
-\end{align}
-\end{subequations} where \(M:=TT'\) and \(N:=SS'\). Note that
-\(N=M^{-1}\).
+  \begin{align}
+    XX' & = GMG' + GT\mu e_n' + e_n\mu'T'G' + \mu'\mu\ e_ne_n',\label{eq-5a} \\
+    YY' & = HNH' + HS\nu e_m' + e_m\nu'S'H' + \nu'\nu\ e_me_m',\label{eq-5b} \\
+    XY' & = GH' + GT\nu e_m' + e_n\mu'S'H' + \mu'\nu\ e_ne_m',\label{eq-5c}
+  \end{align}
+\end{subequations} where \(M := TT'\) and \(N := SS'\). Note that
+\(N = M^{-1}\).
 
-Define an \(n\times \frac12 p(p+1)\) matrix \(G\star G\) which has a
-column for each pair of indices \(1\leq s\leq t\leq p\). Columns of
-\(G\star G\) are elementwise products of columns of \(G\) according to
+Define an \(n \times \frac12 p(p + 1)\) matrix \(G \star G\) which has a
+column for each pair of indices \(1 \leq s \leq t \leq p\). Columns of
+\(G \star G\) are elementwise products of columns of \(G\) according to
 \begin{equation}
-(G\star G)_{(s,t)}:=\begin{cases}2g_sg_t&\text{ if }s\neq t,\\
-g_s^2&\text{ if }s=s.
-\end{cases}
-\end{equation} Matrix \(H\star H\) is defined in the same way, using the
-colums of \(H\). Next define the \(\frac12 p(p+1)\)-element vectors
-\(\overrightarrow{m}\) and \(\overrightarrow{n}\), which have the
-diagonal and subdiagonal elements of \(M\) and \(N\), in the same order
-as the columns of \(G\star G\) and \(H\star H\). Then
-\(\text{diag}(GMG')=(G\star G)\overrightarrow{m}\) and
-\(\text{diag}(HNH')=(H\star H)\overrightarrow{n}\).
+  (G \star G)_{(s,t)} := \begin{cases}
+                           2g_sg_t & \text{ if }s \neq t, \\
+                           g_s^2   & \text{ if }s = s.
+                         \end{cases}
+\end{equation} Matrix \(H \star H\) is defined in the same way, using
+the colums of \(H\). Next define the \(\frac12 p(p + 1)\)-element
+vectors \(\overrightarrow{m}\) and \(\overrightarrow{n}\), which have
+the diagonal and subdiagonal elements of \(M\) and \(N\), in the same
+order as the columns of \(G \star G\) and \(H \star H\). Then
+\(\text{diag}(GMG') = (G \star G)\overrightarrow{m}\) and
+\(\text{diag}(HNH') = (H \star H)\overrightarrow{n}\).
 
 In addition to \eqref{eq-5a}-\eqref{eq-5c} we have \begin{subequations}
-\begin{align}
-\alpha e_m'&=(G\star G)\overrightarrow{m} e_m'+2GT\mu e_m'+\mu'\mu e_ne_m',\label{eq-7a}\\
-e_n\beta'&=e_n\overrightarrow{n}'(H\star H)'+2e_n\nu'S'H'+\nu'\nu e_ne_m'.\label{eq-7b}
-\end{align}
+  \begin{align}
+    \alpha e_m' & = (G \star G)\overrightarrow{m} e_m' + 2GT\mu e_m' + \mu'\mu e_ne_m',\label{eq-7a}  \\
+    e_n\beta'   & = e_n\overrightarrow{n}'(H \star H)' + 2e_n\nu'S'H' + \nu'\nu e_ne_m'.\label{eq-7b}
+  \end{align}
 \end{subequations} Substituting \eqref{eq-5a}-\eqref{eq-5c} and
 \eqref{eq-7a}-\eqref{eq-7b} in equation \eqref{eq-dmat} gives
 \begin{multline}
-D=-2GH'+2GT\eta e_m'-2e_n\eta'S'H'+\\(G\star G)\overrightarrow{m} e_m'+e_n\overrightarrow{n}'(H\star H)'+\eta'\eta e_ne_m',\label{eq-symm}
-\end{multline} with \(\eta:=\mu-\nu\).
+  D = -2GH' + 2GT\eta e_m' - 2e_n\eta'S'H' +                                                                  \\
+  (G \star G)\overrightarrow{m} e_m' + e_n\overrightarrow{n}'(H \star H)' + \eta'\eta e_ne_m',\label{eq-symm}
+\end{multline} with \(\eta := \mu - \nu\).
 
 We now take what could be described as a ``row-oriented approach'', by
 eliminating all references to \(H\) and \(S\) from equation
-\eqref{eq-symm}. Define \(F:=D+2GH'\) and \(\tilde F:=J_nF\). Then, from
-\eqref{eq-symm}, \begin{equation}
-\tilde F=2J_nGT\eta e_m'+J_n(G\star G)\overrightarrow{m} e_m'\label{eq-feq}
-\end{equation} Since \(C=GH'\) it follows that \(D+2GH'=D-J_nDJ_m\) and
-all \(m\) columns of \(\tilde F\) are identical to the centered
-row-averages of \(D\).
+\eqref{eq-symm}. Define \(F := D + 2GH'\) and \(\tilde F := J_nF\).
+Then, from \eqref{eq-symm}, \begin{equation}
+  \tilde F = 2J_nGT\eta e_m' + J_n(G \star G)\overrightarrow{m} e_m'\label{eq-feq}
+\end{equation} Since \(C = GH'\) it follows that
+\(D + 2GH' = D - J_nDJ_m\) and all \(m\) columns of \(\tilde F\) are
+identical to the centered row-averages of \(D\).
 
 Assume \(\tilde F\) is non-zero, i.e.~that not all row-sums of \(D\) are
 the same. Take any of its columns, name it \(f\). Define a matrix
 \begin{equation}
-K:=\begin{bmatrix}2J_nG&J_n(G\star G)\end{bmatrix}.\label{eq-kdef}
+  K := \begin{bmatrix}
+         2J_nG & J_n(G \star G)
+       \end{bmatrix}.\label{eq-kdef}
 \end{equation} We must have \begin{equation}
 f=\begin{bmatrix}2J_nG&J_n(G\star G)\end{bmatrix}\begin{bmatrix}T\eta\\\overrightarrow{m}\end{bmatrix}.\label{eq-linsys}
 \end{equation} This is a system of \(n\) linear equations in
-\(\frac12 p(p+3)\) unknowns. Suppose it has a unique solution for
-\(T\eta\) and \(\overrightarrow{m}\). If \(n\geq\frac12 p(p+3)\) then
-the solution can be computed by inverting any non-singular submatrix of
-order \(\frac12 p(p+3)\). No matter how we choose the submatrix, the
-solution will be the same. From the solution of \eqref{eq-linsys} use
-the elements of \(\overrightarrow{m}\) to reconstruct \(M\). Use any
-decomposition method to find \(T\) from \(M=TT'\) and use \(T\) to find
-\(\eta\) and \(S=(T')^{-1}\). Assume without loss of generality that
-\(\nu=0\). Then \(Y=HS\) and \(X=GT+e_n\mu'\) gives a solution, with
-\(Y\) column-centered.
+\(\frac12 p(p + 3)\) unknowns. Suppose it has a unique solution for
+\(T\eta\) and \(\overrightarrow{m}\). If \(n \geq \frac12 p(p + 3)\)
+then the solution can be computed by inverting any non-singular
+submatrix of order \(\frac12 p(p + 3)\). No matter how we choose the
+submatrix, the solution will be the same. From the solution of
+\eqref{eq-linsys} use the elements of \(\overrightarrow{m}\) to
+reconstruct \(M\). Use any decomposition method to find \(T\) from
+\(M = TT'\) and use \(T\) to find \(\eta\) and \(S = (T')^{-1}\). Assume
+without loss of generality that \(\nu = 0\). Then \(Y = HS\) and
+\(X = GT + e_n\mu'\) gives a solution, with \(Y\) column-centered.
 
 If the system of equations \eqref{eq-dmat} has a solution, then the
 linear equations \eqref{eq-linsys} are a consequence of \eqref{eq-dmat},
 and thus have at least one solution with a positive definite matrix
 \(M\). If \eqref{eq-linsys} has more than one solution, because the
-matrix \(K\) has rank less than \(\frac12p(p+3)\), then we must find a
+matrix \(K\) has rank less than \(\frac12p(p + 3)\), then we must find a
 solution for which \(M\) is positive definite. Conversely, if
 \eqref{eq-linsys} has a solution with \(M\) positive definite then
 system \eqref{eq-dmat} has a solution with dimension
-\(p=\text{rank}(C)\).
+\(p = \text{rank}(C)\).
 
 Note that it is also possible to go the ``column-oriented'' way, by
 defining \(\tilde F\) as \(FJ_m\), which now has identical rows
@@ -492,15 +499,15 @@ the practical situations in mind in which \(n\) is larger, often much
 larger, than \(m\). And we can always find the ``column-oriented''
 solution by applying the ``row-oriented'' calculations to the transpose
 of \(D\). For example, if all row-sums of \(D\) are the same then
-\(\tilde F=0\) and our ``row-oriented'' technique fails. In this case we
-can analyze the transpose of \(D\) instead, which may have non-constant
-row-sums.
+\(\tilde F = 0\) and our ``row-oriented'' technique fails. In this case
+we can analyze the transpose of \(D\) instead, which may have
+non-constant row-sums.
 
 \sectionbreak
 
 \section{Artificial Example}\label{artificial-example}
 
-This section has in-line R code and R output for a \(9\times 3\)
+This section has in-line R code and R output for a \(9 \times 3\)
 artificial example. In the code we use the same names (in lower case)
 for the key matrices as in our formulas (in upper case). The full-rank
 decomposition of \(C\) is computed from its singular value
@@ -726,14 +733,14 @@ for which the \(D\) are squared distances). At various steps our
 technique necessarily differs from the technique in the perfect case.
 
 First we have to pick a \(p\). This can be done a priori, for instance
-by using the MDS default \(p=2\). Or we can pick \(p\) by eye-balling
+by using the MDS default \(p = 2\). Or we can pick \(p\) by eye-balling
 the singular values of \(C\) and try to find an ``elbow'' familiar from
 factor analysis. Instead of a full rank decomposition of \(C\) we then
 use a rank \(p\) approximation \(GH'\), for example by using the \(p\)
 dominant singular values and their singular vectors.
 
 Now proceed with the calculations as in the perfect case. For imperfect
-data with \(GH'\neq C\) the columns of \(F\) from \eqref{eq-dmat} are
+data with \(GH' \neq C\) the columns of \(F\) from \eqref{eq-dmat} are
 not identical any more, and not equal to the centered row-means. So
 picking different columns will give different results. In some cases it
 may make sense to choose \(f\) equal to the row-averages of \(F\). But
@@ -758,11 +765,12 @@ inverse to compute the minimum norm least squares solution.
 
 And finally, and this is the most troublesome problem, we may find that
 \(M\) constructed from the least squares solution is not positive
-definite. In that case case we cannot find a \(T\) such that \(M=TT'\)
+definite. In that case case we cannot find a \(T\) such that \(M = TT'\)
 and we are stuck. As this happens, for now, we give up.
 
-Of course these problems will be less serious if the fit is good, i.e.
-if the elements of \(D\) are approximately squared Euclidean distances.
+Of course these problems will be less serious if the fit is good,
+i.e.~if the elements of \(D\) are approximately squared Euclidean
+distances.
 
 \sectionbreak
 
@@ -821,7 +829,7 @@ clearly in the plot.
 
 \end{figure}%
 
-We now create a \(9\times 9\) off-diagonal submatrix by using the
+We now create a \(9 \times 9\) off-diagonal submatrix by using the
 even-numbered cities as rows and the rest as columns. The transpose of
 the submatrix is also analyzed. Although the two dimensions from the
 complete solution are still there the plots have some distortions
@@ -849,7 +857,7 @@ Transposed}
 
 \subsection{Gold}\label{gold}
 
-Our next example is the same as the one in Heiser and De Leeuw
+Our next example is the same as the one in {Heiser and de Leeuw}
 (\citeproc{ref-heiser_deleeuw_A_79}{1979}). The data are taken from the
 \emph{Power in the Classroom} study of Gold
 (\citeproc{ref-gold_58}{1956}). Children in elementary school, divided
@@ -1000,16 +1008,16 @@ degree of monotonicity.
 
 The function schoenemann() in the file schoenemann.R implements the
 ``row-oriented'' solution to perfect or imperfect data. We choose a
-value of \(p\), with \(p=2\) the default. The singular value
+value of \(p\), with \(p = 2\) the default. The singular value
 decomposition is used to approximate \(D\) by a matrix of rank \(p\). We
 then compute \(\tilde F\). If the parameter fsel is zero, \(f\) are the
 row-averages of \(\tilde F\). If fsel is equal to \(j\) then \(f\) is
 column \(j\) of \(\tilde F\). The R function lm.fit() is used to find
 the least squares solution of the linear system \ldots, and the program
 gives a warning if the estimated rank of \(K\) is less than its number
-of columns \(\frac12 p(p+3)\). From the solution we reconstruct \(M\),
+of columns \(\frac12 p(p + 3)\). From the solution we reconstruct \(M\),
 and again a warning is issued if \(M\) is not positive definite. The R
-function eigen() uses \(M=L\Lambda L'\) to test for positive
+function eigen() uses \(M = L\Lambda L'\) to test for positive
 definiteness. If some eigenvalues are negative then we replace them by
 their absolute values. There is not real convincing justification for
 this, except the lame excuse that if \(M\), which is of order \(p\),
@@ -1025,8 +1033,8 @@ corresponding \(D(X,Y)\) are returned, as well as the input matrix
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
 
-\phantomsection\label{refs}
-\begin{CSLReferences}{1}{0}
+\protect\phantomsection\label{refs}
+\begin{CSLReferences}{1}{1}
 \bibitem[\citeproctext]{ref-borg_groenen_05}
 Borg, Ingwer, and Patrick J. F. Groenen. 2005. \emph{Modern
 Multidimensional Scaling}. Second Edition. Springer.
@@ -1041,12 +1049,12 @@ Vector Methods Used in Multivariate Analysis}.''} \emph{Biometrika} 53:
 325--38.
 
 \bibitem[\citeproctext]{ref-heiser_deleeuw_A_79}
-Heiser, Willem J., and Jan De Leeuw. 1979. {``Metric Multidimensional
-Unfolding.''} \emph{{Methoden En Data Nieuwsbrief SWS/VVS}} 4: 26--50.
-\url{https://jansweb.netlify.app/publication/heiser-deleeuw-a-79/heiser-deleeuw-a-79.pdf}.
+{Heiser, Willem J., and Jan de Leeuw}. 1979. {``{Metric Multidimensional
+Unfolding}.''} \emph{{Methoden en Data Nieuwsbrief SWS/VVS}} 4: 26--50.
+\url{https://deleeuw.github.io/janspubs/heiser-deleeuw-a-79/heiser-deleeuw-a-79.pdf}.
 
 \bibitem[\citeproctext]{ref-roskam_68}
-Roskam, E. E. 1968. {``{Metric Analysis of Ordinal Data in
+Roskam, Edward E. C. I. 1968. {``{Metric Analysis of Ordinal Data in
 Psychology}.''} PhD thesis, University of Leiden.
 
 \bibitem[\citeproctext]{ref-schoenberg_35}
@@ -1060,8 +1068,8 @@ Schönemann, Peter H. 1970. {``{On Metric Multidimensional Unfolding}.''}
 \emph{Psychometrika} 35 (3): 349--66.
 
 \bibitem[\citeproctext]{ref-torgerson_58}
-Torgerson, Warren S. 1958. \emph{{Theory and Methods of Scaling}}. New
-York: Wiley.
+Torgerson, Warren S. 1958. \emph{{Theory and Methods of Scaling}}.
+Wiley.
 
 \bibitem[\citeproctext]{ref-young_householder_38}
 Young, Gale, and Alston S. Householder. 1938. {``{Discussion of a Set of
